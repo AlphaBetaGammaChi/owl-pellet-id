@@ -20,7 +20,12 @@ explicitly asks for a framework or a backend.
   `elongation` = long/short bounding-box ratio; `weight` fields tune the matcher.
 - Prey profiles (`data/prey.js`): `signs` must use the same vocabulary as the
   checkboxes in `index.html` (`fur`, `bones`, `skull`, `teeth`, `feathers`,
-  `beak`, `insects`, `earthworms`, `fish`).
+  `beak`, `insects`, `earthworms`, `fish`). `skullLen`/`massG` ranges drive the
+  prey-size estimate shown on result cards; keep `weight.size` proportional to
+  how diagnostic size is for that prey (e.g. 2.0 for rat, 0.2 for insects).
+- Owl `regions` vocabulary must match the `#region` select options in
+  `index.html`: europe, northamerica, southamerica, africa, asia, australasia,
+  global (global = found nearly everywhere).
 - Scores are weighted fuzzy matches: see `rangeScore`, `hueScore`, `scoreOwl`,
   `scorePrey` in `app.js`. Normalisation is automatic — candidates are scored
   only on the evidence actually supplied.
@@ -31,4 +36,5 @@ No test suite. Verify changes by opening `index.html` (or
 `python3 -m http.server`) and running through both modes:
 mode select → upload → drag crop box → context → Identify → ranked results.
 Check `node --check app.js` for syntax. If a headless browser is available,
-smoke-test that `window.OWL_DATA.length === 10` and scoring returns sorted ranks.
+smoke-test that `window.OWL_DATA.length >= 40`, `window.PREY_DATA.length >= 15`,
+and scoring returns sorted ranks.

@@ -20,7 +20,8 @@ document.querySelectorAll(".mode-btn").forEach((btn) => {
     state.mode = btn.dataset.mode;
     document.querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("active", b === btn));
     $("contentsBox").classList.toggle("hidden", false);
-    $("lenLabel").style.display = state.mode === "pellet" ? "" : "none";
+    $("lenLabel").classList.toggle("hidden", state.mode !== "pellet");
+    $("remainsLabel").classList.toggle("hidden", state.mode !== "prey");
     updateIdentifyBtn();
   });
 });
@@ -219,6 +220,7 @@ function readContext() {
   return {
     region: $("region").value,
     len: parseFloat($("pelletLen").value) || null,
+    remains: parseFloat($("remainsLen").value) || null,
     fresh: $("freshness").value,
     signs
   };
@@ -261,6 +263,10 @@ function scorePrey(p, f, c) {
       (hueScore(f.hue, p.hue) * 0.6 + rangeScore(f.val, p.val) * 0.4);
     got += p.weight.colour;
   }
+  if (c.remains && p.skullLen) {
+    total += (p.weight.size || 1) * rangeScore(c.remains, p.skullLen, 0.4);
+    got += (p.weight.size || 1);
+  }
   return got ? total / got : 0;
 }
 
@@ -285,20 +291,34 @@ function renderResults(ranked) {
         </div>
         <div class="bar"><div style="width:${(score * 100).toFixed(0)}%"></div></div>
         <p>${p.notes || p.keys}</p>
+        ${extraLine(p)}
       </div>`)
     .join("");
   $("results").classList.remove("hidden");
   $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+// Extra reference line under each result: pellet size for owls,
+// estimated prey size/mass for prey remains.
+function extraLine(p) {
+  if (p.pelletLen)
+    return `<p class="ref">Typical pellet length: ${p.pelletLen[0]}–${p.pelletLen[1]} mm.</p>`;
+  const bits = [];
+  if (p.skullLen) bits.push(`skull ${p.skullLen[0]}–${p.skullLen[1]} mm`);
+  if (p.massG) bits.push(`live mass ~${p.massG[0]}–${p.massG[1]} g`);
+  if (p.lenKeys) bits.push(p.lenKeys);
+  return bits.length ? `<p class="ref">Size reference — ${bits.join("; ")}.</p>` : "";
+}
+
 /* ---------- enable/disable identify ---------- */
 
-["region", "pelletLen", "freshness"].forEach((id) => $(id).addEventListener("input", updateIdentifyBtn));
+["region", "pelletLen", "remainsLen", "freshness"].forEach((id) => $(id).addEventListener("input", updateIdentifyBtn));
 document.querySelectorAll("#contentsBox input").forEach((c) =>
   c.addEventListener("change", updateIdentifyBtn));
 
 function updateIdentifyBtn() {
-  const hasContext = $("pelletLen").value || $("region").value !== "global" ||
+  const hasContext = $("pelletLen").value || $("remainsLen").value ||
+    $("region").value !== "global" ||
     document.querySelector("#contentsBox input:checked");
   $("identifyBtn").disabled = !(state.mode && (state.features || hasContext));
 }

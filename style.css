@@ -76,6 +76,7 @@ button.ghost { background: none; color: var(--muted); border: 1px solid var(--li
 .bar { height: 6px; background: #232a2e; border-radius: 3px; margin: 8px 0; }
 .bar div { height: 100%; background: var(--accent); border-radius: 3px; }
 .result p { margin: 6px 0 0; color: var(--muted); font-size: .92rem; }
+.result .ref { color: var(--accent); font-size: .85rem; }
 
 .key ol { color: var(--muted); }
 .key li { margin-bottom: 10px; }

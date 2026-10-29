@@ -10,16 +10,21 @@ Static GitHub Pages site, zero dependencies, all analysis in the browser.
 ## Layout
 
 - `index.html` — 3-step flow: mode (pellet species vs. prey contents) → photo
-  upload + crop box → context (region, pellet length mm, freshness, contents
-  checklist) → ranked results. Also a no-photo guided dichotomous key.
+  upload + crop box → context (7-region dropdown, pellet length mm, freshness,
+  contents checklist; prey mode swaps in a "largest skull/bone mm" input for
+  prey-size estimation) → ranked results with size-reference lines. Also a
+  no-photo guided dichotomous key.
 - `app.js` — canvas feature extraction (HSV mean, dark fraction, specular
   gloss, edge density, dark-region elongation) + weighted fuzzy scorers
   (`scoreOwl`, `scorePrey`; auto-normalised over supplied evidence only).
-- `data/owls.js` — `window.OWL_DATA`, 10 species profiles: `pelletLen` (mm),
-  `hue`/`sat`/`val` ranges, `gloss` (0–1 specular expectation), `elongation`,
-  `contents`, `regions`, `weight` per feature, `notes`.
-- `data/prey.js` — `window.PREY_DATA`, 9 prey profiles keyed on `signs` matching
-  the checkbox vocabulary in index.html.
+  `extraLine()` renders pellet-length or skullLen/massG size references.
+- `data/owls.js` — `window.OWL_DATA`, ~45 species profiles across all regions:
+  `pelletLen` (mm), `hue`/`sat`/`val` ranges, `gloss` (0–1 specular
+  expectation), `elongation`, `contents`, `regions` (europe | northamerica |
+  southamerica | africa | asia | australasia | global), `weight`, `notes`.
+- `data/prey.js` — `window.PREY_DATA`, 17 prey profiles keyed on `signs`
+  matching the checkbox vocabulary in index.html, plus `skullLen`/`massG`
+  ranges and `lenKeys` (mandible/femur guides) for prey-size estimation.
 
 ## Hard rules
 

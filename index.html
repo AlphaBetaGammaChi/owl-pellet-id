@@ -74,11 +74,19 @@
           <option value="global">Global / not sure</option>
           <option value="europe">Europe &amp; UK</option>
           <option value="northamerica">North America</option>
+          <option value="southamerica">Central &amp; South America</option>
+          <option value="africa">Africa</option>
+          <option value="asia">Asia</option>
+          <option value="australasia">Australasia</option>
         </select>
       </label>
       <label id="lenLabel">
         Pellet length (mm) — measure or estimate
         <input type="number" id="pelletLen" min="5" max="200" placeholder="e.g. 45">
+      </label>
+      <label id="remainsLabel" class="hidden">
+        Largest skull or bone found (mm)
+        <input type="number" id="remainsLen" min="1" max="150" placeholder="e.g. 24">
       </label>
       <label>
         Freshness
@@ -124,8 +132,8 @@
             <em>barn owl</em>. Woodland, parks or gardens → <em>tawny</em>. Open moorland or rough grassland →
             <em>short-eared</em> or <em>harrier</em>-like open-country owls. A winter roost with many pellets under
             one tree → <em>long-eared</em>.</li>
-          <li><strong>How big is it?</strong> Under ~30 mm → little owl / screech-owl sized. 30–60 mm → barn, tawny
-            or eared owls. Over ~80 mm → eagle-owl / great horned sized.</li>
+          <li><strong>How big is it?</strong> Under ~30 mm → little owl / scops / screech / pygmy sized.
+            30–60 mm → barn, tawny or eared owls. Over ~80 mm → eagle-owl / great horned / powerful sized.</li>
           <li><strong>Colour and sheen (fresh pellets):</strong> black and <em>glossy/varnished</em> → classic barn
             owl. Grey-brown, matt, loosely felted → tawny. Small, grey, with obvious beetle cases → little owl.</li>
           <li><strong>Contents:</strong> almost entirely small-mammal fur and bones → barn owl. Mammals plus birds,
