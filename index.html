@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owl Pellet ID — species &amp; prey identification from photos</title>
+<meta name="description" content="Upload a photograph of an owl pellet or its contents and get a ranked identification of the owl species and the prey remains inside. Runs entirely in your browser.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <h1>Owl Pellet ID</h1>
+    <p class="tagline">Identify the owl species from a pellet — and the prey remains inside — straight from a photograph.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="disclaimer">
+    <strong>How it works &amp; honest limits:</strong> this tool is a heuristic identifier, not a deep-learning
+    model. It combines measurable photo features (colour, gloss, shape, texture) with the details you give it
+    (size, region, visible contents) and ranks them against a curated knowledge base. Treat results as a
+    well-informed shortlist — confirm important IDs against a field guide or an expert.
+  </section>
+
+  <!-- Step 1: mode -->
+  <section class="card" id="step-mode">
+    <h2><span class="step">1</span> What are you identifying?</h2>
+    <div class="mode-grid">
+      <button class="mode-btn" data-mode="pellet">
+        <span class="mode-title">Whole pellet</span>
+        <span class="mode-desc">Find the owl species that produced it</span>
+      </button>
+      <button class="mode-btn" data-mode="prey">
+        <span class="mode-title">Dissected contents</span>
+        <span class="mode-desc">Identify prey remains (bones, fur, feathers, insect parts)</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Step 2: photo -->
+  <section class="card" id="step-photo">
+    <h2><span class="step">2</span> Upload a photograph</h2>
+    <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload photograph">
+      <p>Drag &amp; drop a photo here, or click to choose a file</p>
+      <p class="hint">Best results: plain background, good lighting, a ruler or coin beside the pellet for scale.</p>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+    <div id="cropper" class="cropper hidden">
+      <p class="hint">Drag a box around <strong>just the pellet / remains</strong> so the colour and shape analysis ignores the background.</p>
+      <div class="canvas-holder">
+        <canvas id="photoCanvas"></canvas>
+        <canvas id="boxCanvas"></canvas>
+      </div>
+      <div class="row">
+        <button id="useWhole" class="ghost">Use whole image</button>
+        <button id="useBox" class="primary" disabled>Analyse selected area</button>
+      </div>
+    </div>
+    <div id="featurePanel" class="features hidden">
+      <h3>Measured from your photo</h3>
+      <ul id="featureList"></ul>
+    </div>
+  </section>
+
+  <!-- Step 3: context -->
+  <section class="card" id="step-context">
+    <h2><span class="step">3</span> Add context</h2>
+    <div class="context-grid">
+      <label>
+        Region where found
+        <select id="region">
+          <option value="global">Global / not sure</option>
+          <option value="europe">Europe &amp; UK</option>
+          <option value="northamerica">North America</option>
+        </select>
+      </label>
+      <label id="lenLabel">
+        Pellet length (mm) — measure or estimate
+        <input type="number" id="pelletLen" min="5" max="200" placeholder="e.g. 45">
+      </label>
+      <label>
+        Freshness
+        <select id="freshness">
+          <option value="unknown">Not sure</option>
+          <option value="fresh">Fresh (dark, moist, intact)</option>
+          <option value="old">Old / weathered (grey, dry, crumbling)</option>
+        </select>
+      </label>
+    </div>
+
+    <fieldset id="contentsBox" class="contents hidden">
+      <legend>What can you see in the pellet? (tick all that apply)</legend>
+      <label><input type="checkbox" value="fur"> Fur / hair</label>
+      <label><input type="checkbox" value="bones"> Bones or bone fragments</label>
+      <label><input type="checkbox" value="skull"> Skull(s) or jaw bones</label>
+      <label><input type="checkbox" value="teeth"> Loose teeth</label>
+      <label><input type="checkbox" value="feathers"> Feathers</label>
+      <label><input type="checkbox" value="beak"> Beak</label>
+      <label><input type="checkbox" value="insects"> Shiny black insect/beetle pieces</label>
+      <label><input type="checkbox" value="earthworms"> Earthworm bristles / soil</label>
+      <label><input type="checkbox" value="fish"> Fish bones or scales</label>
+    </fieldset>
+
+    <button id="identifyBtn" class="primary big" disabled>Identify</button>
+  </section>
+
+  <!-- Results -->
+  <section class="card hidden" id="results">
+    <h2>Results</h2>
+    <div id="resultList"></div>
+    <p class="hint">Confidence is a heuristic match score — use it to compare candidates, not as a probability.</p>
+  </section>
+
+  <!-- Guided key fallback -->
+  <section class="card">
+    <h2>No photo? Use the guided key</h2>
+    <details>
+      <summary>Open the step-by-step identification key</summary>
+      <div id="key" class="key">
+        <ol>
+          <li><strong>Where was it found?</strong> Under a barn roof, church or derelict building → think
+            <em>barn owl</em>. Woodland, parks or gardens → <em>tawny</em>. Open moorland or rough grassland →
+            <em>short-eared</em> or <em>harrier</em>-like open-country owls. A winter roost with many pellets under
+            one tree → <em>long-eared</em>.</li>
+          <li><strong>How big is it?</strong> Under ~30 mm → little owl / screech-owl sized. 30–60 mm → barn, tawny
+            or eared owls. Over ~80 mm → eagle-owl / great horned sized.</li>
+          <li><strong>Colour and sheen (fresh pellets):</strong> black and <em>glossy/varnished</em> → classic barn
+            owl. Grey-brown, matt, loosely felted → tawny. Small, grey, with obvious beetle cases → little owl.</li>
+          <li><strong>Contents:</strong> almost entirely small-mammal fur and bones → barn owl. Mammals plus birds,
+            worms and insects → tawny. Dominated by beetle and insect remains → little owl. Large bones, rabbit or
+            bird remains → eagle-owl / great horned owl.</li>
+        </ol>
+      </div>
+    </details>
+  </section>
+
+  <footer class="site-footer">
+    <p>All analysis happens in your browser — photos are never uploaded anywhere.
+    Knowledge base: <code>data/owls.js</code> &amp; <code>data/prey.js</code>. Contributions welcome.</p>
+  </footer>
+</main>
+
+<script src="data/owls.js"></script>
+<script src="data/prey.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
