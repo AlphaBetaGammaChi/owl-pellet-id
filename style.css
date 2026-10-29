@@ -25,7 +25,7 @@ body {
   text-align: center; background: var(--accent-d); color: #fff; border-radius: 50%;
   font-size: .9rem; margin-right: 8px; }
 
-.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .mode-btn { display: flex; flex-direction: column; gap: 4px; padding: 16px;
   background: #232a2e; border: 2px solid var(--line); border-radius: 10px;
   color: var(--ink); cursor: pointer; text-align: left; }

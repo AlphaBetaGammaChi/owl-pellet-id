@@ -5,7 +5,7 @@
 "use strict";
 
 const state = {
-  mode: null,          // "pellet" | "prey"
+  mode: null,          // "pellet" | "prey" | "dropping"
   image: null,         // HTMLImageElement
   box: null,           // {x,y,w,h} in canvas pixels
   features: null       // measured features
@@ -20,8 +20,12 @@ document.querySelectorAll(".mode-btn").forEach((btn) => {
     state.mode = btn.dataset.mode;
     document.querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("active", b === btn));
     $("contentsBox").classList.toggle("hidden", false);
-    $("lenLabel").classList.toggle("hidden", state.mode !== "pellet");
+    $("lenLabel").classList.toggle("hidden", state.mode === "prey");
     $("remainsLabel").classList.toggle("hidden", state.mode !== "prey");
+    $("shapeLabel").classList.toggle("hidden", state.mode !== "dropping");
+    $("lenText").textContent = state.mode === "dropping"
+      ? "Dropping length / pellet diameter (mm) — measure or estimate"
+      : "Pellet length (mm) — measure or estimate";
     updateIdentifyBtn();
   });
 });
@@ -221,6 +225,7 @@ function readContext() {
     region: $("region").value,
     len: parseFloat($("pelletLen").value) || null,
     remains: parseFloat($("remainsLen").value) || null,
+    shape: $("shape").value,
     fresh: $("freshness").value,
     signs
   };
@@ -270,11 +275,41 @@ function scorePrey(p, f, c) {
   return got ? total / got : 0;
 }
 
+function scoreDropping(d, f, c) {
+  const w = d.weight;
+  let total = 0, got = 0;
+  if (f) {
+    const colour =
+      hueScore(f.hue, d.hue) * 0.5 +
+      rangeScore(f.sat, d.sat) * 0.25 + rangeScore(f.val, d.val) * 0.25;
+    total += w.colour * colour; got += w.colour;
+  }
+  if (c.len) { total += w.size * rangeScore(c.len, d.dropLen, 0.4); got += w.size; }
+  if (c.shape && c.shape !== "unknown") {
+    total += w.shape * (d.shape === c.shape ? 1 : 0.15); got += w.shape;
+  }
+  if (c.region !== "global") {
+    const rs = d.regions.includes(c.region) || d.regions.includes("global") ? 1 : 0.15;
+    total += w.region * rs; got += w.region;
+  }
+  if (c.signs.length) {
+    const hit = c.signs.filter((s) => d.contents.includes(s)).length / c.signs.length;
+    total += w.contents * hit; got += w.contents;
+  }
+  return got ? total / got : 0;
+}
+
+const MODE_MAP = {
+  pellet:   { data: () => window.OWL_DATA,      scorer: scoreOwl },
+  prey:     { data: () => window.PREY_DATA,     scorer: scorePrey },
+  dropping: { data: () => window.DROPPING_DATA, scorer: scoreDropping }
+};
+
 $("identifyBtn").addEventListener("click", () => {
   const c = readContext();
-  const data = state.mode === "pellet" ? window.OWL_DATA : window.PREY_DATA;
-  const scorer = state.mode === "pellet" ? scoreOwl : scorePrey;
-  const ranked = data
+  const { data, scorer } = MODE_MAP[state.mode];
+  const profiles = data();
+  const ranked = profiles
     .map((p) => ({ p, score: scorer(p, state.features, c) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 4);
@@ -303,6 +338,8 @@ function renderResults(ranked) {
 function extraLine(p) {
   if (p.pelletLen)
     return `<p class="ref">Typical pellet length: ${p.pelletLen[0]}–${p.pelletLen[1]} mm.</p>`;
+  if (p.dropLen)
+    return `<p class="ref">Typical size: ${p.dropLen[0]}–${p.dropLen[1]} mm; shape: ${p.shape}.</p>`;
   const bits = [];
   if (p.skullLen) bits.push(`skull ${p.skullLen[0]}–${p.skullLen[1]} mm`);
   if (p.massG) bits.push(`live mass ~${p.massG[0]}–${p.massG[1]} g`);
@@ -312,13 +349,13 @@ function extraLine(p) {
 
 /* ---------- enable/disable identify ---------- */
 
-["region", "pelletLen", "remainsLen", "freshness"].forEach((id) => $(id).addEventListener("input", updateIdentifyBtn));
+["region", "pelletLen", "remainsLen", "shape", "freshness"].forEach((id) => $(id).addEventListener("input", updateIdentifyBtn));
 document.querySelectorAll("#contentsBox input").forEach((c) =>
   c.addEventListener("change", updateIdentifyBtn));
 
 function updateIdentifyBtn() {
   const hasContext = $("pelletLen").value || $("remainsLen").value ||
-    $("region").value !== "global" ||
+    $("region").value !== "global" || $("shape").value !== "unknown" ||
     document.querySelector("#contentsBox input:checked");
   $("identifyBtn").disabled = !(state.mode && (state.features || hasContext));
 }

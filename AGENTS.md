@@ -26,6 +26,11 @@ explicitly asks for a framework or a backend.
 - Owl `regions` vocabulary must match the `#region` select options in
   `index.html`: europe, northamerica, southamerica, africa, asia, australasia,
   global (global = found nearly everywhere).
+- Dropping profiles (`data/droppings.js`): `shape` must be one of `pellets`,
+  `tubular`, `tapered`, `splat`, `cubes` (matching the `#shape` select);
+  `dropLen` is length in mm (or pellet diameter for pellet producers).
+  Contents uses the same signs vocabulary plus `seeds`, `plant`, `mucus`,
+  `shell` — checkboxes also live in `index.html`.
 - Scores are weighted fuzzy matches: see `rangeScore`, `hueScore`, `scoreOwl`,
   `scorePrey` in `app.js`. Normalisation is automatic — candidates are scored
   only on the evidence actually supplied.

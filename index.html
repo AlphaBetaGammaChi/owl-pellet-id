@@ -36,6 +36,10 @@
         <span class="mode-title">Dissected contents</span>
         <span class="mode-desc">Identify prey remains (bones, fur, feathers, insect parts)</span>
       </button>
+      <button class="mode-btn" data-mode="dropping">
+        <span class="mode-title">Droppings / scat</span>
+        <span class="mode-desc">Identify which animal left a dropping — pellets, tubes, spraint, splats, even wombat cubes</span>
+      </button>
     </div>
   </section>
 
@@ -81,8 +85,19 @@
         </select>
       </label>
       <label id="lenLabel">
-        Pellet length (mm) — measure or estimate
+        <span id="lenText">Pellet length (mm) — measure or estimate</span>
         <input type="number" id="pelletLen" min="5" max="200" placeholder="e.g. 45">
+      </label>
+      <label id="shapeLabel" class="hidden">
+        Shape of the dropping
+        <select id="shape">
+          <option value="unknown">Not sure / can't tell</option>
+          <option value="pellets">Separate pellets or balls</option>
+          <option value="tubular">Tubular / sausage / rope</option>
+          <option value="tapered">Tubular with pointed or twisted ends</option>
+          <option value="splat">Splat, smear or liquid</option>
+          <option value="cubes">Cubes or blocky chunks</option>
+        </select>
       </label>
       <label id="remainsLabel" class="hidden">
         Largest skull or bone found (mm)
@@ -109,6 +124,10 @@
       <label><input type="checkbox" value="insects"> Shiny black insect/beetle pieces</label>
       <label><input type="checkbox" value="earthworms"> Earthworm bristles / soil</label>
       <label><input type="checkbox" value="fish"> Fish bones or scales</label>
+      <label><input type="checkbox" value="seeds"> Seeds, berries or fruit stones</label>
+      <label><input type="checkbox" value="plant"> Grass / plant fibre</label>
+      <label><input type="checkbox" value="mucus"> Mucus or jelly</label>
+      <label><input type="checkbox" value="shell"> Shell / crustacean fragments</label>
     </fieldset>
 
     <button id="identifyBtn" class="primary big" disabled>Identify</button>
@@ -152,6 +171,7 @@
 
 <script src="data/owls.js"></script>
 <script src="data/prey.js"></script>
+<script src="data/droppings.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

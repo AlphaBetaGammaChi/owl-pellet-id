@@ -1,9 +1,10 @@
 # Owl Pellet ID
 
-A static website that helps identify **which owl species produced a pellet** and
-**what prey remains it contains** — from photographs uploaded by the user. It is
-designed for GitHub Pages: there is no server, no build step and no dependency.
-Everything runs client-side in the browser; photos never leave the visitor's device.
+A static website that helps identify **which owl species produced a pellet**,
+**what prey remains it contains**, and **which animal left a dropping/scat** —
+from photographs uploaded by the user. It is designed for GitHub Pages: there is
+no server, no build step and no dependency. Everything runs client-side in the
+browser; photos never leave the visitor's device.
 
 ## Quick start
 
@@ -29,8 +30,11 @@ Three evidence streams are combined:
 2. **User context** — region (Europe/UK, North America, Central & South America,
    Africa, Asia, Australasia, global), pellet length in mm, freshness, a
    checklist of visible contents (fur, bones, skulls, teeth, feathers, beak,
-   insect pieces, earthworm/soil, fish), and — in prey mode — the length of the
-   largest skull or bone found (mm) for **prey-size estimation**.
+   insect pieces, earthworm/soil, fish, seeds/berries, plant fibre, mucus,
+   shell), plus mode-specific inputs — prey mode asks for the length of the
+   largest skull or bone (mm) for **prey-size estimation**, and droppings mode
+   asks for dropping length and overall **shape** (pellets, tubular, tapered,
+   splat, cubes).
 3. **Curated knowledge bases** —
    - `data/owls.js`: ~45 owl species profiles covering all continents where owls
      occur (pellet size range, HSV envelope, expected gloss, elongation, typical
@@ -38,7 +42,12 @@ Three evidence streams are combined:
    - `data/prey.js`: 17 prey-remains profiles (visible-content signs, colour
      character, expected **skull-length range and typical live mass** for size
      estimation, plus diagnostic keys such as the red-tipped teeth of shrews and
-     the rootless ridged molars of voles).
+     the rootless ridged molars of voles),
+   - `data/droppings.js`: ~45 scat profiles across all continents — carnivore
+     tubes (fox, coyote, mustelids, cats, civets), herbivore pellets (rabbit,
+     deer, kangaroo, antelope), splats (otter spraint, heron whitewash, badger
+     latrines), and oddities (wombat **cubes**, hyena's chalk-white calcium
+     scats, cassowary whole-fruit scats).
 
 ### Prey-size estimation
 
@@ -52,6 +61,22 @@ mandible typically 14–17 mm*). Rough guide:
 - skull 20–30 mm → vole, wood/house mouse, water shrew;
 - skull 30–55 mm → rat, squirrel;
 - skull > ~55 mm → rabbit, hare, large bird.
+
+### Droppings / scat mode
+
+The third mode runs the same photo-feature pipeline (colour, elongation) but
+adds a categorical **shape** input — usually the fastest discriminator:
+
+- **pellets/balls** → rabbits, hares, deer, kangaroos, mice, elephants;
+- **tubular, blunt ends** → cats, raccoons, hedgehogs, bears;
+- **tubular, pointed/twisted ends** → foxes, coyotes, martens, weasels;
+- **splat/smear/whitewash** → otter spraint, badger, heron;
+- **cubes** → wombats (and the blocky balls of horses/zebra).
+
+Signature finds encoded in the profiles: chalk-white scat = hyena; tarry black
+fish-scale smear = otter spraint; glittering beetle-wing cylinders on lawns =
+hedgehog; purple seed-rich tubes on stumps = pine marten; literal cubes on
+logs = wombat.
 
 Each profile carries per-feature weights; the matcher computes a weighted fuzzy
 score (0–1) per candidate and presents the top matches with explanatory notes.
